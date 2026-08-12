@@ -1,0 +1,27 @@
+/* 위젯 공통 스타일 — 노션 라이트/다크 모드 대응 */
+:root { --text: #4a3f35; --sub: #9a8c7d; --accent: #e5738f; }
+@media (prefers-color-scheme: dark) {
+  :root { --text: #e8e0d5; --sub: #a99f92; }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+  color: var(--text);
+  overflow: hidden;
+  user-select: none;
+}
+.widget { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px; }
+canvas { image-rendering: pixelated; }
+.title { font-size: 13px; color: var(--sub); margin-top: -4px; }
+.big { font-size: 26px; font-weight: 700; letter-spacing: 1px; line-height: 1.2; }
+.controls { display: flex; gap: 6px; margin-top: 4px; }
+.controls button {
+  border: 1px solid var(--sub); background: transparent; color: var(--text);
+  border-radius: 8px; padding: 2px 12px; font-size: 12px; cursor: pointer;
+  font-family: inherit;
+}
+.controls button:hover { border-color: var(--accent); color: var(--accent); }

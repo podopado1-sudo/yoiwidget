@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>귀여운 노션 위젯 — 픽셀 펫 · 디데이 · 뽀모도로 타이머</title>
+<meta name="description" content="노션 페이지에 붙여넣기만 하면 되는 귀여운 무료 위젯. 클릭하면 반응하는 픽셀 고양이 펫, 시험·기념일 디데이 위젯, 공부용 뽀모도로 타이머로 노션을 꾸며보세요.">
+<style>
+:root {
+  --bg: #fdf9f3; --card: #ffffff; --text: #4a3f35; --sub: #9a8c7d;
+  --accent: #e5738f; --line: #eee2d3;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #201c18; --card: #2a251f; --text: #e8e0d5; --sub: #a99f92; --line: #3a332b; }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+}
+main { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
+header { text-align: center; margin-bottom: 48px; }
+h1 { font-size: 32px; margin: 0 0 8px; }
+header p { color: var(--sub); margin: 0; }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 24px; margin-bottom: 28px;
+  display: grid; grid-template-columns: 240px 1fr; gap: 24px;
+}
+@media (max-width: 640px) { .card { grid-template-columns: 1fr; } }
+.preview {
+  border: 1px dashed var(--line); border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; min-height: 220px;
+}
+.preview iframe { border: 0; width: 100%; height: 220px; }
+h2 { margin: 0 0 4px; font-size: 20px; }
+.desc { color: var(--sub); font-size: 14px; margin: 0 0 16px; }
+label { display: block; font-size: 13px; color: var(--sub); margin: 10px 0 4px; }
+input {
+  width: 100%; max-width: 260px; padding: 6px 10px; font-size: 14px;
+  border: 1px solid var(--line); border-radius: 8px;
+  background: var(--bg); color: var(--text); font-family: inherit;
+}
+input[type="color"] { padding: 2px; height: 34px; width: 60px; cursor: pointer; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+.row > div { flex: 1; min-width: 120px; }
+.urlbox { display: flex; gap: 8px; margin-top: 16px; }
+.urlbox input { max-width: none; flex: 1; font-size: 12px; color: var(--sub); }
+.urlbox button {
+  border: 0; background: var(--accent); color: #fff; border-radius: 8px;
+  padding: 6px 16px; font-size: 13px; cursor: pointer; font-family: inherit; white-space: nowrap;
+}
+.urlbox button:hover { opacity: .85; }
+.howto { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
+.howto ol { margin: 8px 0 0; padding-left: 20px; line-height: 1.9; }
+footer { text-align: center; color: var(--sub); font-size: 13px; margin-top: 48px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>🐾 귀여운 노션 위젯</h1>
+    <p>붙여넣기 한 번이면 노션이 귀여워져요 — 전부 무료</p>
+  </header>
+
+  <section class="card" data-page="pet.html">
+    <div class="preview"><iframe loading="lazy" title="픽셀 펫 미리보기"></iframe></div>
+    <div>
+      <h2>픽셀 펫</h2>
+      <p class="desc">클릭하면 좋아하고, 가만히 두면 잠드는 픽셀 고양이. 노션 페이지 한켠에 함께 살아요.</p>
+      <div class="row">
+        <div><label>몸통 색</label><input type="color" data-param="c" value="#f5d7a8"></div>
+        <div><label>이름 (선택)</label><input type="text" data-param="name" placeholder="냥이"></div>
+      </div>
+      <div class="urlbox"><input readonly><button>URL 복사</button></div>
+    </div>
+  </section>
+
+  <section class="card" data-page="dday.html">
+    <div class="preview"><iframe loading="lazy" title="디데이 미리보기"></iframe></div>
+    <div>
+      <h2>디데이</h2>
+      <p class="desc">시험, 기념일, 여행까지 — 픽셀 고양이가 남은 날을 같이 세어주는 노션 디데이 위젯.</p>
+      <div class="row">
+        <div><label>제목</label><input type="text" data-param="title" value="수능"></div>
+        <div><label>날짜</label><input type="date" data-param="date" value="2026-11-19"></div>
+        <div><label>몸통 색</label><input type="color" data-param="c" value="#f5d7a8"></div>
+      </div>
+      <div class="urlbox"><input readonly><button>URL 복사</button></div>
+    </div>
+  </section>
+
+  <section class="card" data-page="timer.html">
+    <div class="preview"><iframe loading="lazy" title="뽀모도로 타이머 미리보기"></iframe></div>
+    <div>
+      <h2>뽀모도로 타이머</h2>
+      <p class="desc">집중 시간엔 고양이도 옆에서 함께, 휴식 시간엔 새근새근. 공부 메이트가 되어주는 노션 타이머 위젯.</p>
+      <div class="row">
+        <div><label>집중 (분)</label><input type="number" data-param="w" value="25" min="1" max="120"></div>
+        <div><label>휴식 (분)</label><input type="number" data-param="b" value="5" min="1" max="60"></div>
+        <div><label>몸통 색</label><input type="color" data-param="c" value="#f5d7a8"></div>
+      </div>
+      <div class="urlbox"><input readonly><button>URL 복사</button></div>
+    </div>
+  </section>
+
+  <section class="howto">
+    <h2>노션에 넣는 방법</h2>
+    <ol>
+      <li>위에서 원하는 위젯을 꾸민 뒤 <b>URL 복사</b> 버튼을 누르세요.</li>
+      <li>노션 페이지에 붙여넣기(Ctrl+V) 하세요.</li>
+      <li>메뉴가 뜨면 <b>임베드 생성</b>을 선택하면 끝! 모서리를 드래그해 크기를 조절할 수 있어요.</li>
+    </ol>
+  </section>
+
+  <footer>매주 새로운 귀여운 위젯이 추가돼요 · 문의는 준비 중</footer>
+</main>
+<script>
+document.querySelectorAll(".card").forEach(card => {
+  const page = card.dataset.page;
+  const iframe = card.querySelector("iframe");
+  const urlInput = card.querySelector(".urlbox input");
+  const copyBtn = card.querySelector(".urlbox button");
+
+  function build() {
+    const url = new URL(page, location.href);
+    card.querySelectorAll("input[data-param]").forEach(inp => {
+      let v = inp.value.trim();
+      if (!v) return;
+      if (inp.type === "color") v = v.replace("#", "");
+      url.searchParams.set(inp.dataset.param, v);
+    });
+    urlInput.value = url.href;
+    return url.href;
+  }
+
+  let t;
+  card.querySelectorAll("input[data-param]").forEach(inp =>
+    inp.addEventListener("input", () => {
+      build();
+      clearTimeout(t);
+      t = setTimeout(() => { iframe.src = urlInput.value; }, 400);
+    })
+  );
+
+  copyBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(build());
+      copyBtn.textContent = "복사 완료!";
+    } catch {
+      urlInput.select(); document.execCommand("copy");
+      copyBtn.textContent = "복사 완료!";
+    }
+    setTimeout(() => { copyBtn.textContent = "URL 복사"; }, 1500);
+  });
+
+  iframe.src = build();
+});
+</script>
+</body>
+</html>

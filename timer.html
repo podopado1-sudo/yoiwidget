@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>뽀모도로 타이머 위젯</title>
+<link rel="stylesheet" href="widget.css">
+</head>
+<body>
+<div class="widget">
+  <canvas id="cv"></canvas>
+  <div class="big" id="time">25:00</div>
+  <div class="title" id="mode">같이 집중해요!</div>
+  <div class="controls">
+    <button id="startBtn">시작</button>
+    <button id="resetBtn">리셋</button>
+  </div>
+</div>
+<script type="module">
+import { Pet, qs, setupPage } from "./engine.js";
+setupPage();
+
+const WORK = Math.max(1, Number(qs("w", 25))) * 60;
+const BREAK = Math.max(1, Number(qs("b", 5))) * 60;
+
+const scale = Number(qs("s", 0)) ||
+  Math.max(4, Math.min(8, Math.floor(Math.min(innerWidth, innerHeight - 90) / 22)));
+const pet = new Pet(document.getElementById("cv"), { scale });
+
+const timeEl = document.getElementById("time");
+const modeEl = document.getElementById("mode");
+const startBtn = document.getElementById("startBtn");
+
+let mode = "work";          // work | break
+let remaining = WORK;
+let running = false;
+let last = null;
+
+function fmt(sec) {
+  const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+function render() {
+  timeEl.textContent = fmt(remaining);
+  modeEl.textContent = mode === "work"
+    ? (running ? "집중하는 중..." : "같이 집중해요!")
+    : "쉬는 시간 zZ";
+  startBtn.textContent = running ? "일시정지" : "시작";
+}
+
+function switchMode(next) {
+  mode = next;
+  remaining = next === "work" ? WORK : BREAK;
+  pet.forceSleep(next === "break");
+  if (next === "work") pet.poke(); // 휴식 끝! 기지개
+}
+
+setInterval(() => {
+  if (running) {
+    const now = Date.now();
+    remaining -= (now - last) / 1000;
+    last = now;
+    if (mode === "work") pet.lastInteract = now; // 집중 중엔 졸지 않기
+    if (remaining <= 0) {
+      pet.poke();
+      switchMode(mode === "work" ? "break" : "work");
+    }
+  }
+  render();
+}, 250);
+
+startBtn.addEventListener("click", () => {
+  running = !running;
+  last = Date.now();
+  if (mode === "break") pet.forceSleep(running);
+  render();
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  running = false;
+  pet.forceSleep(false);
+  switchMode("work");
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

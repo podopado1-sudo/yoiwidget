@@ -3,8 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>귀여운 노션 위젯 — 픽셀 펫 · 디데이 · 뽀모도로 타이머</title>
-<meta name="description" content="노션 페이지에 붙여넣기만 하면 되는 귀여운 무료 위젯. 클릭하면 반응하는 픽셀 고양이 펫, 시험·기념일 디데이 위젯, 공부용 뽀모도로 타이머로 노션을 꾸며보세요.">
+<!-- 커스텀 도메인 전환 시 갱신할 것: canonical, og:url, og:image, JSON-LD url + robots.txt, sitemap.xml -->
+<title>귀여운 노션 위젯 무료 — 픽셀 펫·디데이·뽀모도로 타이머 | 요이위젯</title>
+<meta name="description" content="노션 페이지에 붙여넣기만 하면 되는 귀여운 무료 노션 위젯. 클릭하면 반응하는 픽셀 고양이 펫, 시험·기념일 디데이, 공부용 뽀모도로 타이머로 노션 꾸미기를 시작하세요.">
+<link rel="canonical" href="https://yoiwidget.vercel.app/">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="요이위젯">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:title" content="귀여운 노션 위젯 무료 — 픽셀 펫·디데이·뽀모도로 타이머">
+<meta property="og:description" content="붙여넣기 한 번으로 끝나는 노션 꾸미기. 픽셀 고양이 펫, 디데이, 뽀모도로 타이머 위젯 전부 무료.">
+<meta property="og:url" content="https://yoiwidget.vercel.app/">
+<meta property="og:image" content="https://yoiwidget.vercel.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"요이위젯","alternateName":["yoiwidget","귀여운 노션 위젯"],"url":"https://yoiwidget.vercel.app/","inLanguage":"ko"}
+</script>
 <style>
 :root {
   --bg: #fdf9f3; --card: #ffffff; --text: #4a3f35; --sub: #9a8c7d;
@@ -20,8 +36,10 @@ body {
 }
 main { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
 header { text-align: center; margin-bottom: 48px; }
+#hero-cv { image-rendering: pixelated; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.hint { color: var(--sub); font-size: 13px; margin: 0 0 12px; }
 h1 { font-size: 32px; margin: 0 0 8px; }
-header p { color: var(--sub); margin: 0; }
+header .tagline { color: var(--sub); margin: 0; }
 .card {
   background: var(--card); border: 1px solid var(--line); border-radius: 16px;
   padding: 24px; margin-bottom: 28px;
@@ -36,7 +54,7 @@ header p { color: var(--sub); margin: 0; }
 h2 { margin: 0 0 4px; font-size: 20px; }
 .desc { color: var(--sub); font-size: 14px; margin: 0 0 16px; }
 label { display: block; font-size: 13px; color: var(--sub); margin: 10px 0 4px; }
-input {
+input, select {
   width: 100%; max-width: 260px; padding: 6px 10px; font-size: 14px;
   border: 1px solid var(--line); border-radius: 8px;
   background: var(--bg); color: var(--text); font-family: inherit;
@@ -44,6 +62,12 @@ input {
 input[type="color"] { padding: 2px; height: 34px; width: 60px; cursor: pointer; }
 .row { display: flex; gap: 12px; flex-wrap: wrap; }
 .row > div { flex: 1; min-width: 120px; }
+.swatches { display: flex; gap: 8px; margin: 4px 0 6px; }
+.swatches button {
+  width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line);
+  cursor: pointer; padding: 0; transition: transform .1s;
+}
+.swatches button:hover, .swatches button.on { transform: scale(1.2); border-color: var(--accent); }
 .urlbox { display: flex; gap: 8px; margin-top: 16px; }
 .urlbox input { max-width: none; flex: 1; font-size: 12px; color: var(--sub); }
 .urlbox button {
@@ -51,56 +75,93 @@ input[type="color"] { padding: 2px; height: 34px; width: 60px; cursor: pointer; 
   padding: 6px 16px; font-size: 13px; cursor: pointer; font-family: inherit; white-space: nowrap;
 }
 .urlbox button:hover { opacity: .85; }
-.howto { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
+.howto { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; margin-bottom: 28px; }
 .howto ol { margin: 8px 0 0; padding-left: 20px; line-height: 1.9; }
+.howto h3 { margin: 18px 0 4px; font-size: 15px; }
+.howto p { margin: 0; color: var(--sub); line-height: 1.7; }
 footer { text-align: center; color: var(--sub); font-size: 13px; margin-top: 48px; }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <h1>🐾 귀여운 노션 위젯</h1>
-    <p>붙여넣기 한 번이면 노션이 귀여워져요 — 전부 무료</p>
+    <canvas id="hero-cv" aria-label="요이위젯 픽셀 고양이"></canvas>
+    <p class="hint">고양이를 클릭해 보세요!</p>
+    <h1>요이위젯</h1>
+    <p class="tagline">귀여운 노션 위젯 — 붙여넣기 한 번이면 노션이 귀여워져요, 전부 무료</p>
   </header>
 
   <section class="card" data-page="pet.html">
-    <div class="preview"><iframe loading="lazy" title="픽셀 펫 미리보기"></iframe></div>
+    <div class="preview"><iframe loading="lazy" title="노션 펫 위젯 미리보기"></iframe></div>
     <div>
-      <h2>픽셀 펫</h2>
+      <h2>픽셀 펫 (노션 펫 위젯)</h2>
       <p class="desc">클릭하면 좋아하고, 가만히 두면 잠드는 픽셀 고양이. 노션 페이지 한켠에 함께 살아요.</p>
       <div class="row">
-        <div><label>몸통 색</label><input type="color" data-param="c" value="#f5d7a8"></div>
+        <div>
+          <label>몸통 색</label>
+          <div class="swatches"></div>
+          <input type="color" data-param="c" value="#f5d7a8">
+        </div>
         <div><label>이름 (선택)</label><input type="text" data-param="name" placeholder="냥이"></div>
+        <div><label>노션 테마</label>
+          <select data-param="theme">
+            <option value="">자동 (OS 설정)</option>
+            <option value="light">라이트</option>
+            <option value="dark">다크</option>
+          </select>
+        </div>
       </div>
-      <div class="urlbox"><input readonly><button>URL 복사</button></div>
+      <div class="urlbox"><input readonly aria-label="임베드 URL"><button>URL 복사</button></div>
     </div>
   </section>
 
   <section class="card" data-page="dday.html">
-    <div class="preview"><iframe loading="lazy" title="디데이 미리보기"></iframe></div>
+    <div class="preview"><iframe loading="lazy" title="노션 디데이 위젯 미리보기"></iframe></div>
     <div>
-      <h2>디데이</h2>
-      <p class="desc">시험, 기념일, 여행까지 — 픽셀 고양이가 남은 날을 같이 세어주는 노션 디데이 위젯.</p>
+      <h2>노션 디데이 위젯</h2>
+      <p class="desc">수능, 자격증 시험, 기념일까지 — 픽셀 고양이가 남은 날을 같이 세어주는 디데이 위젯. 디데이 당일엔 하루 종일 축하해줘요.</p>
       <div class="row">
         <div><label>제목</label><input type="text" data-param="title" value="수능"></div>
         <div><label>날짜</label><input type="date" data-param="date" value="2026-11-19"></div>
-        <div><label>몸통 색</label><input type="color" data-param="c" value="#f5d7a8"></div>
+        <div>
+          <label>몸통 색</label>
+          <div class="swatches"></div>
+          <input type="color" data-param="c" value="#f5d7a8">
+        </div>
+        <div><label>노션 테마</label>
+          <select data-param="theme">
+            <option value="">자동 (OS 설정)</option>
+            <option value="light">라이트</option>
+            <option value="dark">다크</option>
+          </select>
+        </div>
       </div>
-      <div class="urlbox"><input readonly><button>URL 복사</button></div>
+      <div class="urlbox"><input readonly aria-label="임베드 URL"><button>URL 복사</button></div>
     </div>
   </section>
 
   <section class="card" data-page="timer.html">
-    <div class="preview"><iframe loading="lazy" title="뽀모도로 타이머 미리보기"></iframe></div>
+    <div class="preview"><iframe loading="lazy" title="노션 뽀모도로 타이머 위젯 미리보기"></iframe></div>
     <div>
-      <h2>뽀모도로 타이머</h2>
-      <p class="desc">집중 시간엔 고양이도 옆에서 함께, 휴식 시간엔 새근새근. 공부 메이트가 되어주는 노션 타이머 위젯.</p>
+      <h2>노션 뽀모도로 타이머</h2>
+      <p class="desc">집중 시간엔 고양이도 옆에서 함께, 휴식 시간엔 새근새근. 공부 메이트가 되어주는 노션 공부 타이머 위젯.</p>
       <div class="row">
-        <div><label>집중 (분)</label><input type="number" data-param="w" value="25" min="1" max="120"></div>
+        <div><label>집중 (분)</label><input type="number" data-param="w" value="25" min="1" max="180"></div>
         <div><label>휴식 (분)</label><input type="number" data-param="b" value="5" min="1" max="60"></div>
-        <div><label>몸통 색</label><input type="color" data-param="c" value="#f5d7a8"></div>
+        <div>
+          <label>몸통 색</label>
+          <div class="swatches"></div>
+          <input type="color" data-param="c" value="#f5d7a8">
+        </div>
+        <div><label>노션 테마</label>
+          <select data-param="theme">
+            <option value="">자동 (OS 설정)</option>
+            <option value="light">라이트</option>
+            <option value="dark">다크</option>
+          </select>
+        </div>
       </div>
-      <div class="urlbox"><input readonly><button>URL 복사</button></div>
+      <div class="urlbox"><input readonly aria-label="임베드 URL"><button>URL 복사</button></div>
     </div>
   </section>
 
@@ -113,9 +174,27 @@ footer { text-align: center; color: var(--sub); font-size: 13px; margin-top: 48p
     </ol>
   </section>
 
-  <footer>매주 새로운 귀여운 위젯이 추가돼요 · 문의는 준비 중</footer>
+  <section class="howto">
+    <h2>자주 묻는 질문</h2>
+    <h3>정말 무료인가요?</h3>
+    <p>네, 요이위젯의 모든 노션 위젯은 무료예요. 회원가입도 필요 없어요.</p>
+    <h3>노션에 임베드가 안 될 때는?</h3>
+    <p>URL을 붙여넣은 뒤 나오는 메뉴에서 "임베드 생성"을 선택해야 해요. 메뉴가 안 뜨면 /embed 를 입력한 뒤 URL을 넣어보세요.</p>
+    <h3>모바일 노션 앱에서도 보이나요?</h3>
+    <p>네, 노션 임베드는 모바일 앱에서도 그대로 동작해요. 노션이 다크 모드라면 위젯의 "노션 테마"를 다크로 맞춰주세요.</p>
+    <h3>어떤 위젯이 있나요?</h3>
+    <p>픽셀 고양이 펫, 수능·자격증 시험 디데이, 공부용 뽀모도로 타이머가 있고 매주 새로운 귀여운 위젯이 추가될 예정이에요.</p>
+  </section>
+
+  <footer>요이위젯 (yoiwidget) · 매주 새로운 귀여운 위젯이 추가돼요</footer>
 </main>
+<script type="module">
+import { Pet } from "./engine.js";
+new Pet(document.getElementById("hero-cv"), { scale: 7 });
+</script>
 <script>
+const PRESETS = ["f5d7a8", "f6f1ea", "b9b3ab", "f2c4cf", "aecbeb", "b8e0d2"]; // 치즈·흰냥·회냥·핑크·하늘·민트
+
 document.querySelectorAll(".card").forEach(card => {
   const page = card.dataset.page;
   const iframe = card.querySelector("iframe");
@@ -124,7 +203,7 @@ document.querySelectorAll(".card").forEach(card => {
 
   function build() {
     const url = new URL(page, location.href);
-    card.querySelectorAll("input[data-param]").forEach(inp => {
+    card.querySelectorAll("[data-param]").forEach(inp => {
       let v = inp.value.trim();
       if (!v) return;
       if (inp.type === "color") v = v.replace("#", "");
@@ -135,13 +214,35 @@ document.querySelectorAll(".card").forEach(card => {
   }
 
   let t;
-  card.querySelectorAll("input[data-param]").forEach(inp =>
-    inp.addEventListener("input", () => {
-      build();
-      clearTimeout(t);
-      t = setTimeout(() => { iframe.src = urlInput.value; }, 400);
-    })
-  );
+  function onChange() {
+    build();
+    clearTimeout(t);
+    t = setTimeout(() => { iframe.src = urlInput.value; }, 400);
+  }
+  card.querySelectorAll("[data-param]").forEach(inp => {
+    inp.addEventListener("input", onChange);
+    inp.addEventListener("change", onChange);
+  });
+
+  // 파스텔 프리셋 스와치
+  const colorInput = card.querySelector('input[type="color"]');
+  const swatches = card.querySelector(".swatches");
+  PRESETS.forEach(hex => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.style.background = "#" + hex;
+    b.setAttribute("aria-label", "몸통 색 #" + hex);
+    if ("#" + hex === colorInput.value) b.classList.add("on");
+    b.addEventListener("click", () => {
+      colorInput.value = "#" + hex;
+      swatches.querySelectorAll("button").forEach(x => x.classList.remove("on"));
+      b.classList.add("on");
+      onChange();
+    });
+    swatches.appendChild(b);
+  });
+  colorInput.addEventListener("input", () =>
+    swatches.querySelectorAll("button").forEach(x => x.classList.remove("on")));
 
   copyBtn.addEventListener("click", async () => {
     try {

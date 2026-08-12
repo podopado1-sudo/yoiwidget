@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>픽셀 펫 위젯</title>
+<meta name="robots" content="noindex">
+<title>픽셀 펫 위젯 | 요이위젯</title>
+<meta name="description" content="노션에 임베드하는 귀여운 픽셀 고양이 펫 위젯 — 요이위젯">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="widget.css">
 </head>
 <body>
@@ -12,12 +15,18 @@
   <div class="title" id="name" hidden></div>
 </div>
 <script type="module">
-import { Pet, qs, setupPage } from "./engine.js";
+import { Pet, qs, computeScale, setupPage } from "./engine.js";
 setupPage();
 
-const scale = Number(qs("s", 0)) ||
-  Math.max(4, Math.min(10, Math.floor(Math.min(innerWidth, innerHeight) / 22)));
-new Pet(document.getElementById("cv"), { scale });
+const RESERVE = 20;
+const pet = new Pet(document.getElementById("cv"), { scale: computeScale(RESERVE) });
+
+// 노션은 임베드 블록 리사이즈 시 iframe을 리로드하지 않는다 — 크기를 따라간다
+let rt;
+addEventListener("resize", () => {
+  clearTimeout(rt);
+  rt = setTimeout(() => pet.setScale(computeScale(RESERVE)), 150);
+});
 
 const name = qs("name", "");
 if (name) {

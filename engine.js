@@ -202,7 +202,7 @@ const FRAMES16 = {
 // 이펙트도 픽셀 스프라이트로 — 벡터 글리프는 픽셀 감성을 깨트린다
 const FX = {
   heart: [".1.1.", "11111", ".111.", "..1.."],
-  z: ["111", ".1.", "111"]
+  z: ["1111", "..1.", ".1..", "1111"] // 대각선이 있어야 z로 읽힌다
 };
 const FX_COLOR = { heart: "#e5738f", z: "#8fa3b8" };
 
@@ -348,13 +348,14 @@ class Pet {
         ctx.fillStyle = c;
         ctx.fillRect(x * scale, (y + offY) * scale, scale, scale);
       }
-    // 이펙트: 스프라이트 스케일 그대로(32그리드 기준), 그리드 스냅
+    // 이펙트: 16 그리드에선 절반 스케일로 — 캐릭터 대비 비율을 32 그리드와 맞춘다
+    const s2 = this.mini ? Math.max(1, Math.round(scale / 2)) : scale;
     this.effects.forEach(e => {
       ctx.fillStyle = FX_COLOR[e.kind];
       FX[e.kind].forEach((row, dy) => {
         for (let dx = 0; dx < row.length; dx++)
           if (row[dx] === "1")
-            ctx.fillRect(Math.round(e.x + dx) * scale, Math.round(e.y + dy) * scale, scale, scale);
+            ctx.fillRect(Math.round(e.x * scale) + dx * s2, Math.round(e.y * scale) + dy * s2, s2, s2);
       });
     });
   }
@@ -368,4 +369,4 @@ function setupPage() {
   if (bg && HEXRE.test(bg)) document.body.style.background = "#" + bg;
 }
 
-export { Pet, FRAMES, FRAMES16, SKINS, BASE, variant, qs, hexParam, computeScale, effectiveTheme, setupPage };
+export { Pet, FRAMES, FRAMES16, FX, FX_COLOR, SKINS, BASE, variant, qs, hexParam, computeScale, effectiveTheme, setupPage };

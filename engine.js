@@ -1,14 +1,14 @@
-/* 요이위젯 character engine — 32×32 치즈 줄무늬 고양이 "요이"
+/* 요이위젯 character engine — 32×32 치즈 줄무늬 고양이 "요이" (+16×16 미니)
  * 픽셀 캐릭터 렌더링 + 애니메이션 상태머신. 모든 위젯이 이 엔진을 공유한다.
  * URL 파라미터:
  *   skin  = cheese | cream | gray | tux (기본 cheese)
  *   c     = 몸통 색 커스텀 (hex, # 없이) — 줄무늬는 자동으로 어두운 톤 파생
+ *   px    = 16 이면 미니 16×16 스프라이트 (기본 32)
  *   bg    = 배경 색 (hex 또는 생략=투명)
  *   s     = 픽셀 스케일 1~12 (생략=자동)
  *   theme = light | dark (생략=OS 설정 따름 — 노션 인앱 테마는 감지 불가라 명시 지정용)
  */
 
-const SPRITE_W = 32, SPRITE_H = 32;
 const HEXRE = /^(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
 /* 팔레트 문자: O외곽선 B몸통 S줄무늬 W가슴·발 P핑크(귀·코·혀) L볼터치 E눈 H하이라이트 */
@@ -32,10 +32,10 @@ const BASE = [
   "...OBBBBBBBBBBBSSBBBBBBBBBBBO...",
   "..OBBBBBBBBBBBBBBBBBBBBBBBBBBO..",
   "..OBBBBEHEBBBBBBBBBBBBEHEBBBBO..",
-  "O.OBBBBEEEBBBBBBBBBBBBEEEBBBBO.O",
-  "O.OLLBBEEEBBBBBBBBBBBBEEEBBLLO.O",
+  "..OBBBBEEEBBBBBBBBBBBBEEEBBBBO..",
+  "OOOLLBBEEEBBBBBBBBBBBBEEEBBLLOOO",
   "..OLLBBBBBBBBBBPPBBBBBBBBBBLLO..",
-  "..OBBBBBBBBBBBOBBOBBBBBBBBBBBO..",
+  "OOOBBBBBBBBBBBOBBOBBBBBBBBBBBOOO",
   "..OBBBBBBBBBBBBBBBBBBBBBBBBBBO..",
   "...OBBBBBBBBBBBBBBBBBBBBBBBBO...",
   "....OBBBBBBBBBBBBBBBBBBBBBBO....",
@@ -87,6 +87,118 @@ const FRAMES = {
   ])
 };
 
+/* 16×16 미니 요이 — ?px=16. 가슴털은 3-4-4-3 타원 */
+const FRAMES16 = {
+  idle1: [
+    "................",
+    "..O....O........",
+    ".OPO..OPO.......",
+    ".OBBOOBBO.......",
+    ".OBBSSBBO.......",
+    ".OBEBBEBO.......",
+    ".OLBPBBLO.......",
+    "..OBBBOO........",
+    "..OBBBBOO.......",
+    ".OBBBBBBBO..O...",
+    ".OBBWWWBBO.OBO..",
+    ".OBWWWWBBO.OSO..",
+    ".OBWWWWBBBOBBO..",
+    ".OBBWWWBBBOBBO..",
+    "..OOOOOOOOOOO...",
+    "................"
+  ],
+  idle2: [
+    "................",
+    "..O....O........",
+    ".OPO..OPO.......",
+    ".OBBOOBBO.......",
+    ".OBBSSBBO.......",
+    ".OBEBBEBO.......",
+    ".OLBPBBLO.......",
+    "..OBBBOO........",
+    "..OBBBBOO...O...",
+    ".OBBBBBBBO.OBO..",
+    ".OBBWWWBBO.OBO..",
+    ".OBWWWWBBBOBBOO.",
+    ".OBWWWWBBBOBBO..",
+    ".OBBWWWBBBOOBO..",
+    "..OOOOOOOOOOO...",
+    "................"
+  ],
+  blink: [
+    "................",
+    "..O....O........",
+    ".OPO..OPO.......",
+    ".OBBOOBBO.......",
+    ".OBBSSBBO.......",
+    ".OBOBBOBO.......",
+    ".OLBPBBLO.......",
+    "..OBBBOO........",
+    "..OBBBBOO.......",
+    ".OBBBBBBBO..O...",
+    ".OBBWWWBBO.OBO..",
+    ".OBWWWWBBO.OSO..",
+    ".OBWWWWBBBOBBO..",
+    ".OBBWWWBBBOBBO..",
+    "..OOOOOOOOOOO...",
+    "................"
+  ],
+  sleep1: [
+    "................",
+    "................",
+    "................",
+    "..O....O........",
+    ".OPO..OPO.......",
+    ".OBBOOBBO.......",
+    ".OBBSSBBO.......",
+    ".OBOOBOOO.......",
+    "..OBBBBOO.......",
+    ".OBBBBBBBO..O...",
+    ".OBBWWWBBO.OBO..",
+    ".OBWWWWBBO.OSO..",
+    ".OBWWWWBBBOBBO..",
+    ".OBBWWWBBBOBBO..",
+    "..OOOOOOOOOOO...",
+    "................"
+  ],
+  sleep2: [
+    "................",
+    "................",
+    "................",
+    "..O....O........",
+    ".OPO..OPO.......",
+    ".OBBOOBBO.......",
+    ".OBBSSBBO.......",
+    ".OBOOBOOO.......",
+    "..OBBBBOO...O...",
+    ".OBBBBBBBO.OBO..",
+    ".OBBWWWBBO.OBO..",
+    ".OBWWWWBBBOBBOO.",
+    ".OBWWWWBBBOBBO..",
+    ".OBBWWWBBBOOBO..",
+    "..OOOOOOOOOOO...",
+    "................"
+  ],
+  happy: [
+    "................",
+    "..O....O........",
+    ".OPO..OPO.......",
+    ".OBBOOBBO.......",
+    ".OBOBBOBO.......",
+    ".OOBOOBOO.......",
+    ".OLBPBBLO.......",
+    "..OBBBOO........",
+    "..OBBBBOO.......",
+    ".OBBBBBBBO..O...",
+    ".OBBWWWBBO.OBO..",
+    ".OBWWWWBBO.OSO..",
+    ".OBWWWWBBBOBBO..",
+    ".OBBWWWBBBOBBO..",
+    "..OOOOOOOOOOO...",
+    "................"
+  ]
+};
+
 // 이펙트도 픽셀 스프라이트로 — 벡터 글리프는 픽셀 감성을 깨트린다
 const FX = {
   heart: [".1.1.", "11111", ".111.", "..1.."],
@@ -117,12 +229,17 @@ function effectiveTheme() {
   return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
+function isMini() { return qs("px", "") === "16"; }
+
 // s 파라미터(1~12)가 있으면 고정, 없으면 뷰포트 기준 자동.
 // reserve = 캐릭터 아래 텍스트/버튼이 차지하는 높이(px)
-function computeScale(reserve = 0, min = 1, max = 6) {
+function computeScale(reserve = 0, min = 1, max = 0) {
+  const mini = isMini();
+  if (!max) max = mini ? 12 : 6;
   const s = Math.floor(Number(qs("s", 0)));
   if (s >= 1 && s <= 12) return s;
-  return Math.max(min, Math.min(max, Math.floor(Math.min(innerWidth, innerHeight - reserve) / 44)));
+  const div = mini ? 22 : 44;
+  return Math.max(min, Math.min(max, Math.floor(Math.min(innerWidth, innerHeight - reserve) / div)));
 }
 
 function buildPalette(opts = {}) {
@@ -148,6 +265,10 @@ class Pet {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.palette = buildPalette(opts);
+    this.mini = opts.mini ?? isMini();
+    this.size = this.mini ? 16 : 32;           // 스프라이트 한 변
+    this.effectRows = this.mini ? 3 : 5;       // 위 이펙트 공간
+    this.frames = this.mini ? FRAMES16 : FRAMES;
     this.state = "idle";        // idle | sleep | happy
     this.tick = 0;
     this.lastInteract = Date.now();
@@ -155,7 +276,7 @@ class Pet {
     this.effects = [];          // {kind, x, y, life}
     this.reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    this.setScale(opts.scale || 4);
+    this.setScale(opts.scale || (this.mini ? 8 : 4));
     canvas.style.cursor = "pointer";
     canvas.style.transition = "transform .12s ease-out";
     canvas.style.transformOrigin = "50% 100%";
@@ -168,8 +289,8 @@ class Pet {
   setScale(s) {
     if (s === this.scale) return;
     this.scale = s;
-    this.canvas.width = SPRITE_W * s;
-    this.canvas.height = (SPRITE_H + 5) * s; // 위 5칸은 하트/Zzz 이펙트용
+    this.canvas.width = this.size * s;
+    this.canvas.height = (this.size + this.effectRows) * s; // 위 칸은 하트/Zzz 이펙트용
     this.ctx.imageSmoothingEnabled = false;  // canvas.width 변경이 컨텍스트를 리셋함
     this.draw();
   }
@@ -177,7 +298,8 @@ class Pet {
   poke() {
     this.lastInteract = Date.now();
     this.setState("happy");
-    this.effects.push({ kind: "heart", x: 8 + Math.random() * 16, y: 4, life: 6 });
+    const half = this.size / 2;
+    this.effects.push({ kind: "heart", x: half / 2 + Math.random() * half, y: this.effectRows - 1, life: 6 });
     this.happyUntil = Date.now() + 1500;
     if (!this.reduced) {
       this.canvas.style.transform = "scaleX(1.07) scaleY(.9)";
@@ -197,7 +319,7 @@ class Pet {
     else if (this.state === "idle" && idleFor > this.sleepAfterMs) this.setState("sleep");
 
     if (this.state === "sleep" && this.tick % 8 === 0)
-      this.effects.push({ kind: "z", x: 20 + Math.random() * 6, y: 4, life: 8 });
+      this.effects.push({ kind: "z", x: this.size * 0.62 + Math.random() * (this.size / 5), y: this.effectRows - 1, life: 8 });
 
     this.effects.forEach(e => { if (!this.reduced) e.y -= 0.5; e.life--; });
     this.effects = this.effects.filter(e => e.life > 0);
@@ -205,21 +327,22 @@ class Pet {
   }
 
   currentFrame() {
+    const F = this.frames;
     if (this.reduced)
-      return this.state === "sleep" ? FRAMES.sleep1 : this.state === "happy" ? FRAMES.happy : FRAMES.idle1;
-    if (this.state === "sleep") return this.tick % 8 < 4 ? FRAMES.sleep1 : FRAMES.sleep2;
-    if (this.state === "happy") return FRAMES.happy;
-    if (this.tick % 16 === 15) return FRAMES.blink;
-    return this.tick % 4 < 2 ? FRAMES.idle1 : FRAMES.idle2;
+      return this.state === "sleep" ? F.sleep1 : this.state === "happy" ? F.happy : F.idle1;
+    if (this.state === "sleep") return this.tick % 8 < 4 ? F.sleep1 : F.sleep2;
+    if (this.state === "happy") return F.happy;
+    if (this.tick % 16 === 15) return F.blink;
+    return this.tick % 4 < 2 ? F.idle1 : F.idle2;
   }
 
   draw() {
     const { ctx, scale } = this;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     const rows = this.currentFrame();
-    const offY = 5;
-    for (let y = 0; y < SPRITE_H; y++)
-      for (let x = 0; x < SPRITE_W; x++) {
+    const offY = this.effectRows;
+    for (let y = 0; y < this.size; y++)
+      for (let x = 0; x < this.size; x++) {
         const c = this.palette[rows[y][x]];
         if (!c) continue;
         ctx.fillStyle = c;
@@ -245,4 +368,4 @@ function setupPage() {
   if (bg && HEXRE.test(bg)) document.body.style.background = "#" + bg;
 }
 
-export { Pet, FRAMES, SKINS, BASE, variant, qs, hexParam, computeScale, effectiveTheme, setupPage };
+export { Pet, FRAMES, FRAMES16, SKINS, BASE, variant, qs, hexParam, computeScale, effectiveTheme, setupPage };

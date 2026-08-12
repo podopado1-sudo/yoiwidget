@@ -2,12 +2,18 @@
 // 실행: node tools/gen-assets.mjs
 import zlib from "node:zlib";
 import fs from "node:fs";
-import { FRAMES, SKINS } from "../engine.js";
+import { FRAMES, FRAMES16, SKINS } from "../engine.js";
 
 const frames = Object.entries(FRAMES);
 for (const [name, rows] of frames) {
   rows.forEach((r, i) => {
-    if (r.length !== 32) { console.error(`${name} row ${i}: len ${r.length}`); process.exit(1); }
+    if (r.length !== 32) { console.error(`32 ${name} row ${i}: len ${r.length}`); process.exit(1); }
+  });
+}
+const frames16 = Object.entries(FRAMES16);
+for (const [name, rows] of frames16) {
+  rows.forEach((r, i) => {
+    if (r.length !== 16) { console.error(`16 ${name} row ${i}: len ${r.length}`); process.exit(1); }
   });
 }
 
@@ -19,7 +25,7 @@ function palOf(skin) {
 
 // ---- 검증 시트: 6프레임 × cheese + 스킨 4종 idle1 ----
 const S = 5, GAP = 10, COL = 6;
-const W = COL * (32 * S + GAP) + GAP, H = 2 * (32 * S + GAP) + GAP;
+const W = COL * (32 * S + GAP) + GAP, H = 3 * (32 * S + GAP) + GAP;
 const img = Buffer.alloc(W * H * 4);
 function px(x, y, hex) {
   if (x < 0 || y < 0 || x >= W || y >= H) return;
@@ -40,6 +46,7 @@ function draw(rows, pal, ox, oy, s) {
 const cheese = palOf("cheese");
 frames.forEach(([name, rows], i) => draw(rows, cheese, GAP + i * (32 * S + GAP), GAP, S));
 Object.keys(SKINS).forEach((skin, i) => draw(FRAMES.idle1, palOf(skin), GAP + i * (32 * S + GAP), GAP + 32 * S + GAP, S));
+frames16.forEach(([name, rows], i) => draw(rows, cheese, GAP + i * (32 * S + GAP), GAP + 2 * (32 * S + GAP), S * 2));
 
 function crc32(buf) {
   let c, crc = 0xffffffff;

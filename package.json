@@ -1,0 +1,9 @@
+{
+  "name": "yoiwidget",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "http-server . -p 5173 -c-1",
+    "assets": "node tools/gen-assets.mjs"
+  }
+}

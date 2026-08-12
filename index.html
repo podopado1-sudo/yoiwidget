@@ -98,9 +98,9 @@ footer { text-align: center; color: var(--sub); font-size: 13px; margin-top: 48p
       <p class="desc">클릭하면 좋아하고, 가만히 두면 잠드는 픽셀 고양이. 노션 페이지 한켠에 함께 살아요.</p>
       <div class="row">
         <div>
-          <label>몸통 색</label>
+          <label>스킨 · 커스텀 색</label>
           <div class="swatches"></div>
-          <input type="color" data-param="c" value="#f5d7a8">
+          <input type="color" data-param="c" value="#f5c37e">
         </div>
         <div><label>이름 (선택)</label><input type="text" data-param="name" placeholder="냥이"></div>
         <div><label>노션 테마</label>
@@ -124,9 +124,9 @@ footer { text-align: center; color: var(--sub); font-size: 13px; margin-top: 48p
         <div><label>제목</label><input type="text" data-param="title" value="수능"></div>
         <div><label>날짜</label><input type="date" data-param="date" value="2026-11-19"></div>
         <div>
-          <label>몸통 색</label>
+          <label>스킨 · 커스텀 색</label>
           <div class="swatches"></div>
-          <input type="color" data-param="c" value="#f5d7a8">
+          <input type="color" data-param="c" value="#f5c37e">
         </div>
         <div><label>노션 테마</label>
           <select data-param="theme">
@@ -149,9 +149,9 @@ footer { text-align: center; color: var(--sub); font-size: 13px; margin-top: 48p
         <div><label>집중 (분)</label><input type="number" data-param="w" value="25" min="1" max="180"></div>
         <div><label>휴식 (분)</label><input type="number" data-param="b" value="5" min="1" max="60"></div>
         <div>
-          <label>몸통 색</label>
+          <label>스킨 · 커스텀 색</label>
           <div class="swatches"></div>
-          <input type="color" data-param="c" value="#f5d7a8">
+          <input type="color" data-param="c" value="#f5c37e">
         </div>
         <div><label>노션 테마</label>
           <select data-param="theme">
@@ -190,10 +190,16 @@ footer { text-align: center; color: var(--sub); font-size: 13px; margin-top: 48p
 </main>
 <script type="module">
 import { Pet } from "./engine.js";
-new Pet(document.getElementById("hero-cv"), { scale: 7 });
+new Pet(document.getElementById("hero-cv"), { scale: 5 });
 </script>
 <script>
-const PRESETS = ["f5d7a8", "f6f1ea", "b9b3ab", "f2c4cf", "aecbeb", "b8e0d2"]; // 치즈·흰냥·회냥·핑크·하늘·민트
+// 스킨 프리셋: [skin 파라미터, 대표색]
+const SKIN_PRESETS = [
+  ["cheese", "#f5c37e", "치즈 줄무늬"],
+  ["cream", "#f5d7a8", "크림"],
+  ["gray", "#c7c1ba", "회색 줄무늬"],
+  ["tux", "#45454e", "턱시도"]
+];
 
 document.querySelectorAll(".card").forEach(card => {
   const page = card.dataset.page;
@@ -204,6 +210,7 @@ document.querySelectorAll(".card").forEach(card => {
   function build() {
     const url = new URL(page, location.href);
     card.querySelectorAll("[data-param]").forEach(inp => {
+      if (inp.dataset.skip === "1") return; // 커스텀 색은 사용자가 만졌을 때만 포함
       let v = inp.value.trim();
       if (!v) return;
       if (inp.type === "color") v = v.replace("#", "");
@@ -224,25 +231,35 @@ document.querySelectorAll(".card").forEach(card => {
     inp.addEventListener("change", onChange);
   });
 
-  // 파스텔 프리셋 스와치
+  // 스킨 스와치 + 커스텀 색
   const colorInput = card.querySelector('input[type="color"]');
+  colorInput.dataset.skip = "1"; // 기본은 스킨 사용
+  const skinInput = document.createElement("input");
+  skinInput.type = "hidden";
+  skinInput.dataset.param = "skin";
+  card.appendChild(skinInput);
   const swatches = card.querySelector(".swatches");
-  PRESETS.forEach(hex => {
+  SKIN_PRESETS.forEach(([skin, hex, label], i) => {
     const b = document.createElement("button");
     b.type = "button";
-    b.style.background = "#" + hex;
-    b.setAttribute("aria-label", "몸통 색 #" + hex);
-    if ("#" + hex === colorInput.value) b.classList.add("on");
+    b.style.background = hex;
+    b.title = label;
+    b.setAttribute("aria-label", label + " 스킨");
+    if (i === 0) b.classList.add("on");
     b.addEventListener("click", () => {
-      colorInput.value = "#" + hex;
+      skinInput.value = skin;
+      colorInput.dataset.skip = "1";
+      colorInput.value = hex;
       swatches.querySelectorAll("button").forEach(x => x.classList.remove("on"));
       b.classList.add("on");
       onChange();
     });
     swatches.appendChild(b);
   });
-  colorInput.addEventListener("input", () =>
-    swatches.querySelectorAll("button").forEach(x => x.classList.remove("on")));
+  colorInput.addEventListener("input", () => {
+    colorInput.dataset.skip = "0";
+    swatches.querySelectorAll("button").forEach(x => x.classList.remove("on"));
+  });
 
   copyBtn.addEventListener("click", async () => {
     try {

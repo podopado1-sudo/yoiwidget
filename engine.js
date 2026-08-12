@@ -1,125 +1,90 @@
-/* 요이위젯 character engine
+/* 요이위젯 character engine — 32×32 치즈 줄무늬 고양이 "요이"
  * 픽셀 캐릭터 렌더링 + 애니메이션 상태머신. 모든 위젯이 이 엔진을 공유한다.
  * URL 파라미터:
- *   c     = 몸통 색 (hex, # 없이)          예: c=f5d7a8
+ *   skin  = cheese | cream | gray | tux (기본 cheese)
+ *   c     = 몸통 색 커스텀 (hex, # 없이) — 줄무늬는 자동으로 어두운 톤 파생
  *   bg    = 배경 색 (hex 또는 생략=투명)
- *   s     = 픽셀 스케일 (1~24, 생략=자동)
+ *   s     = 픽셀 스케일 1~12 (생략=자동)
  *   theme = light | dark (생략=OS 설정 따름 — 노션 인앱 테마는 감지 불가라 명시 지정용)
  */
 
-const SPRITE_W = 16, SPRITE_H = 16;
+const SPRITE_W = 32, SPRITE_H = 32;
 const HEXRE = /^(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
-// 팔레트 인덱스: . 투명 / 1 몸통 / 2 외곽선 / 3 핑크(귀 안·코) / 4 눈 / 5 볼터치
+/* 팔레트 문자: O외곽선 B몸통 S줄무늬 W가슴·발 P핑크(귀·코·혀) L볼터치 E눈 H하이라이트 */
+const SKINS = {
+  cheese: { O: "7a4a28", B: "f5c37e", S: "e09b52", W: "fdf0dc", P: "f2a6b8", L: "f0a090", E: "3a2f28", H: "ffffff" },
+  cream:  { O: "5b4636", B: "f5d7a8", S: "e8c58f", W: "fdf4e3", P: "f2a6b8", L: "f8c9d4", E: "3a2f28", H: "ffffff" },
+  gray:   { O: "4f4a45", B: "c7c1ba", S: "a49d95", W: "f4f1ed", P: "f2a6b8", L: "e8b8c0", E: "33302c", H: "ffffff" },
+  tux:    { O: "26262c", B: "45454e", S: "35353d", W: "f6f4f0", P: "f2a6b8", L: "d98a96", E: "d9a441", H: "ffffff" }
+};
+
+const BASE = [
+  "................................",
+  "......O..................O......",
+  ".....OBO................OBO.....",
+  ".....OPBO..............OBPO.....",
+  "....OBPPBO............OBPPBO....",
+  "....OBPPBO............OBPPBO....",
+  "....OBBBBOOOOOOOOOOOOOOBBBBO....",
+  "....OBBBBBBBBSBSSBSBBBBBBBBO....",
+  "...OBBBBBBBBBSBSSBSBBBBBBBBBO...",
+  "...OBBBBBBBBBBBSSBBBBBBBBBBBO...",
+  "..OBBBBBBBBBBBBBBBBBBBBBBBBBBO..",
+  "..OBBBBEHEBBBBBBBBBBBBEHEBBBBO..",
+  "O.OBBBBEEEBBBBBBBBBBBBEEEBBBBO.O",
+  "O.OLLBBEEEBBBBBBBBBBBBEEEBBLLO.O",
+  "..OLLBBBBBBBBBBPPBBBBBBBBBBLLO..",
+  "..OBBBBBBBBBBBOBBOBBBBBBBBBBBO..",
+  "..OBBBBBBBBBBBBBBBBBBBBBBBBBBO..",
+  "...OBBBBBBBBBBBBBBBBBBBBBBBBO...",
+  "....OBBBBBBBBBBBBBBBBBBBBBBO....",
+  "....OBBBBBBWWWWWWWWWWBBBBBBO....",
+  "...OSSBBBBWWWWWWWWWWWWBBBBSSO...",
+  "...OSBBBBBWWWWWWWWWWWWBBBBBSO...",
+  "..OBBBBBBBWWWWWWWWWWWWBBBBBBBOO.",
+  "..OBBBBBBBWWWWWWWWWWWWBBBBBBOBBO",
+  "..OBBBBBBBWWWWWWWWWWWWBBBBBBOSSO",
+  "..OBBBBBBBBWWWWWWWWWWBBBBBBBOBBO",
+  "..OBBBBBBBBBBWWWWWWBBBBBBBBOBBO.",
+  "..OBBBBBBBOWWWWWWWWWWOBBBBBOBO..",
+  "...OOOOOOOOOOOOOOOOOOOOOOOOOO...",
+  "................................",
+  "................................",
+  "................................"
+];
+
+// 프레임 = BASE + 픽셀 편집 [row, xStart, xEnd, char]
+function variant(rows, edits) {
+  const out = rows.map(r => [...r]);
+  for (const [r, x1, x2, ch] of edits) for (let x = x1; x <= x2; x++) out[r][x] = ch;
+  return out.map(a => a.join(""));
+}
+
+const CLOSED_EYES = [
+  [11, 7, 9, "B"], [11, 22, 24, "B"],
+  [13, 7, 9, "B"], [13, 22, 24, "B"]
+];
+const TAIL_UP = [
+  [21, 29, 30, "O"],
+  [22, 29, 30, "B"], [22, 31, 31, "O"],
+  [26, 28, 31, "."],
+  [27, 28, 29, "."]
+];
+
 const FRAMES = {
-  idle1: [
-    "................",
-    "..2....2........",
-    ".232..232.......",
-    ".21122112.......",
-    ".21111112.......",
-    ".21411412.......",
-    ".25131152.......",
-    "..211122........",
-    "..2111122.......",
-    ".211111112..2...",
-    ".211111112.212..",
-    ".211111112.212..",
-    ".2111111112112..",
-    ".2111111112112..",
-    "..22222222222...",
-    "................"
-  ],
-  idle2: [ // 꼬리 흔들기
-    "................",
-    "..2....2........",
-    ".232..232.......",
-    ".21122112.......",
-    ".21111112.......",
-    ".21411412.......",
-    ".25131152.......",
-    "..211122........",
-    "..2111122...2...",
-    ".211111112.212..",
-    ".211111112.212..",
-    ".2111111121122..",
-    ".2111111112112..",
-    ".2111111112212..",
-    "..22222222222...",
-    "................"
-  ],
-  blink: [
-    "................",
-    "..2....2........",
-    ".232..232.......",
-    ".21122112.......",
-    ".21111112.......",
-    ".21211212.......",
-    ".25131152.......",
-    "..211122........",
-    "..2111122.......",
-    ".211111112..2...",
-    ".211111112.212..",
-    ".211111112.212..",
-    ".2111111112112..",
-    ".2111111112112..",
-    "..22222222222...",
-    "................"
-  ],
-  sleep1: [
-    "................",
-    "................",
-    "................",
-    "..2....2........",
-    ".232..232.......",
-    ".21122112.......",
-    ".21111112.......",
-    ".21221222.......",
-    "..2111122.......",
-    ".211111112..2...",
-    ".211111112.212..",
-    ".211111112.212..",
-    ".2111111112112..",
-    ".2111111112112..",
-    "..22222222222...",
-    "................"
-  ],
-  sleep2: [
-    "................",
-    "................",
-    "................",
-    "..2....2........",
-    ".232..232.......",
-    ".21122112.......",
-    ".21111112.......",
-    ".21221222.......",
-    "..2111122...2...",
-    ".211111112.212..",
-    ".211111112.212..",
-    ".2111111121122..",
-    ".2111111112112..",
-    ".2111111112212..",
-    "..22222222222...",
-    "................"
-  ],
-  happy: [ // ^^ 눈
-    "................",
-    "..2....2........",
-    ".232..232.......",
-    ".21122112.......",
-    ".21211212.......",
-    ".22122122.......",
-    ".25131152.......",
-    "..211122........",
-    "..2111122.......",
-    ".211111112..2...",
-    ".211111112.212..",
-    ".211111112.212..",
-    ".2111111112112..",
-    ".2111111112112..",
-    "..22222222222...",
-    "................"
-  ]
+  idle1: BASE,
+  idle2: variant(BASE, TAIL_UP),
+  blink: variant(BASE, CLOSED_EYES),
+  sleep1: variant(BASE, CLOSED_EYES),
+  sleep2: variant(BASE, [...CLOSED_EYES, ...TAIL_UP]),
+  happy: variant(BASE, [
+    // ^^ 눈
+    [11, 7, 9, "B"], [11, 8, 8, "E"], [12, 7, 9, "B"], [12, 7, 7, "E"], [12, 9, 9, "E"], [13, 7, 9, "B"],
+    [11, 22, 24, "B"], [11, 23, 23, "E"], [12, 22, 24, "B"], [12, 22, 22, "E"], [12, 24, 24, "E"], [13, 22, 24, "B"],
+    // 벌린 입 + 혀
+    [15, 15, 16, "O"], [16, 15, 16, "P"]
+  ])
 };
 
 // 이펙트도 픽셀 스프라이트로 — 벡터 글리프는 픽셀 감성을 깨트린다
@@ -139,6 +104,12 @@ function hexParam(name, fallback) {
   return v && HEXRE.test(v) ? "#" + v : fallback;
 }
 
+function darken(hex, amount) {
+  const n = parseInt(hex.replace("#", ""), 16);
+  const f = c => Math.max(0, Math.round(c * (1 - amount))).toString(16).padStart(2, "0");
+  return "#" + f((n >> 16) & 255) + f((n >> 8) & 255) + f(n & 255);
+}
+
 // theme 파라미터 > OS 설정. 노션 임베드에서는 OS와 노션 테마가 어긋날 수 있어 명시 지정이 필요하다.
 function effectiveTheme() {
   const t = document.documentElement.dataset.theme;
@@ -146,26 +117,37 @@ function effectiveTheme() {
   return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-// s 파라미터(1~24)가 있으면 고정, 없으면 뷰포트 기준 자동.
+// s 파라미터(1~12)가 있으면 고정, 없으면 뷰포트 기준 자동.
 // reserve = 캐릭터 아래 텍스트/버튼이 차지하는 높이(px)
-function computeScale(reserve = 0, min = 2, max = 10) {
+function computeScale(reserve = 0, min = 1, max = 6) {
   const s = Math.floor(Number(qs("s", 0)));
-  if (s >= 1 && s <= 24) return s;
-  return Math.max(min, Math.min(max, Math.floor(Math.min(innerWidth, innerHeight - reserve) / 22)));
+  if (s >= 1 && s <= 12) return s;
+  return Math.max(min, Math.min(max, Math.floor(Math.min(innerWidth, innerHeight - reserve) / 44)));
+}
+
+function buildPalette(opts = {}) {
+  const skinName = opts.skin || qs("skin", "cheese");
+  const skin = { ...(SKINS[skinName] || SKINS.cheese) };
+  const custom = hexParam("c", opts.body || null);
+  const dark = effectiveTheme() === "dark";
+  const pal = {
+    O: "#" + skin.O, B: "#" + skin.B, S: "#" + skin.S, W: "#" + skin.W,
+    P: "#" + skin.P, L: "#" + skin.L, E: "#" + skin.E, H: "#" + skin.H
+  };
+  if (custom) {
+    pal.B = custom;
+    pal.S = darken(custom, 0.18); // 줄무늬는 몸통색에서 자동 파생
+  }
+  if (dark && (skinName === "cheese" || skinName === "cream"))
+    pal.O = "#8a6a48"; // 다크 페이지에서 실루엣이 녹지 않게
+  return pal;
 }
 
 class Pet {
   constructor(canvas, opts = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
-    const dark = effectiveTheme() === "dark";
-    this.palette = {
-      "1": hexParam("c", opts.body || "#f5d7a8"),
-      "2": dark ? "#8a7460" : "#5b4636", // 다크 페이지에서 실루엣이 녹지 않게
-      "3": "#f2a6b8",
-      "4": "#3a2f28",
-      "5": "#f8c9d4"
-    };
+    this.palette = buildPalette(opts);
     this.state = "idle";        // idle | sleep | happy
     this.tick = 0;
     this.lastInteract = Date.now();
@@ -173,12 +155,12 @@ class Pet {
     this.effects = [];          // {kind, x, y, life}
     this.reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    this.setScale(opts.scale || 8);
+    this.setScale(opts.scale || 4);
     canvas.style.cursor = "pointer";
     canvas.style.transition = "transform .12s ease-out";
     canvas.style.transformOrigin = "50% 100%";
     canvas.setAttribute("role", "img");
-    canvas.setAttribute("aria-label", "픽셀 고양이");
+    canvas.setAttribute("aria-label", "픽셀 고양이 요이");
     canvas.addEventListener("pointerdown", () => this.poke());
     this.timer = setInterval(() => this.step(), this.reduced ? 1000 : 250);
   }
@@ -187,7 +169,7 @@ class Pet {
     if (s === this.scale) return;
     this.scale = s;
     this.canvas.width = SPRITE_W * s;
-    this.canvas.height = (SPRITE_H + 3) * s; // 위 3칸은 하트/Zzz 이펙트용
+    this.canvas.height = (SPRITE_H + 5) * s; // 위 5칸은 하트/Zzz 이펙트용
     this.ctx.imageSmoothingEnabled = false;  // canvas.width 변경이 컨텍스트를 리셋함
     this.draw();
   }
@@ -195,7 +177,7 @@ class Pet {
   poke() {
     this.lastInteract = Date.now();
     this.setState("happy");
-    this.effects.push({ kind: "heart", x: 4 + Math.random() * 8, y: 2.5, life: 6 });
+    this.effects.push({ kind: "heart", x: 8 + Math.random() * 16, y: 4, life: 6 });
     this.happyUntil = Date.now() + 1500;
     if (!this.reduced) {
       this.canvas.style.transform = "scaleX(1.07) scaleY(.9)";
@@ -215,9 +197,9 @@ class Pet {
     else if (this.state === "idle" && idleFor > this.sleepAfterMs) this.setState("sleep");
 
     if (this.state === "sleep" && this.tick % 8 === 0)
-      this.effects.push({ kind: "z", x: 9 + Math.random() * 3, y: 2.5, life: 8 });
+      this.effects.push({ kind: "z", x: 20 + Math.random() * 6, y: 4, life: 8 });
 
-    this.effects.forEach(e => { if (!this.reduced) e.y -= 0.3; e.life--; });
+    this.effects.forEach(e => { if (!this.reduced) e.y -= 0.5; e.life--; });
     this.effects = this.effects.filter(e => e.life > 0);
     this.draw();
   }
@@ -235,7 +217,7 @@ class Pet {
     const { ctx, scale } = this;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     const rows = this.currentFrame();
-    const offY = 3;
+    const offY = 5;
     for (let y = 0; y < SPRITE_H; y++)
       for (let x = 0; x < SPRITE_W; x++) {
         const c = this.palette[rows[y][x]];
@@ -243,14 +225,13 @@ class Pet {
         ctx.fillStyle = c;
         ctx.fillRect(x * scale, (y + offY) * scale, scale, scale);
       }
-    // 이펙트: 절반 스케일 픽셀 스프라이트, 그리드 스냅
-    const s2 = Math.max(1, Math.round(scale / 2));
+    // 이펙트: 스프라이트 스케일 그대로(32그리드 기준), 그리드 스냅
     this.effects.forEach(e => {
       ctx.fillStyle = FX_COLOR[e.kind];
       FX[e.kind].forEach((row, dy) => {
         for (let dx = 0; dx < row.length; dx++)
           if (row[dx] === "1")
-            ctx.fillRect(Math.round(e.x * scale) + dx * s2, Math.round(e.y * scale) + dy * s2, s2, s2);
+            ctx.fillRect(Math.round(e.x + dx) * scale, Math.round(e.y + dy) * scale, scale, scale);
       });
     });
   }
@@ -264,4 +245,4 @@ function setupPage() {
   if (bg && HEXRE.test(bg)) document.body.style.background = "#" + bg;
 }
 
-export { Pet, FRAMES, qs, hexParam, computeScale, effectiveTheme, setupPage };
+export { Pet, FRAMES, SKINS, BASE, variant, qs, hexParam, computeScale, effectiveTheme, setupPage };

@@ -1,9 +1,9 @@
-/* 요이위젯 character engine — 32×32 치즈 줄무늬 고양이 "요이" (+16×16 미니)
+/* 요이위젯 character engine — 16×16 치즈 줄무늬 고양이 "요이" (+32×32 상세 버전)
  * 픽셀 캐릭터 렌더링 + 애니메이션 상태머신. 모든 위젯이 이 엔진을 공유한다.
  * URL 파라미터:
  *   skin  = cheese | cream | gray | tux (기본 cheese)
  *   c     = 몸통 색 커스텀 (hex, # 없이) — 줄무늬는 자동으로 어두운 톤 파생
- *   px    = 16 이면 미니 16×16 스프라이트 (기본 32)
+ *   px    = 32 이면 상세 32×32 스프라이트 (기본 16)
  *   bg    = 배경 색 (hex 또는 생략=투명)
  *   s     = 픽셀 스케일 1~12 (생략=자동)
  *   theme = light | dark (생략=OS 설정 따름 — 노션 인앱 테마는 감지 불가라 명시 지정용)
@@ -229,7 +229,7 @@ function effectiveTheme() {
   return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function isMini() { return qs("px", "") === "16"; }
+function isMini() { return qs("px", "16") !== "32"; }
 
 // s 파라미터(1~12)가 있으면 고정, 없으면 뷰포트 기준 자동.
 // reserve = 캐릭터 아래 텍스트/버튼이 차지하는 높이(px)

@@ -78,11 +78,11 @@ const png = Buffer.concat([
 const sheetPath = new URL("./frames-sheet.png", import.meta.url);
 fs.writeFileSync(sheetPath, png);
 
-// ---- favicon.svg (idle1, cheese) ----
-const rects = FRAMES.idle1.flatMap((row, y) =>
+// ---- favicon.svg (16×16 기본 요이 idle1, cheese) ----
+const rects = FRAMES16.idle1.flatMap((row, y) =>
   [...row].map((ch, x) => cheese[ch] ? `<rect x="${x}" y="${y}" width="1" height="1" fill="#${cheese[ch]}"/>` : "").filter(Boolean)
 ).join("");
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges">${rects}</svg>\n`;
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">${rects}</svg>\n`;
 fs.writeFileSync(new URL("../favicon.svg", import.meta.url), svg);
 
 console.log("OK sheet:", png.length, "bytes; favicon.svg written");
